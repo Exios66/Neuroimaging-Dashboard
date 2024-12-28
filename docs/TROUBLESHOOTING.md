@@ -8,7 +8,7 @@
 
 1. **PostgreSQL Connection Error**
 
-   ```
+   ```text
    Error: Could not connect to PostgreSQL database
    ```
 
@@ -20,7 +20,7 @@
 
 2. **Python Dependencies**
 
-   ```
+   ```text
    Error: No module named 'nibabel'
    ```
 
@@ -31,7 +31,7 @@
 
 3. **Permission Issues**
 
-   ```
+   ```shell
    Error: Permission denied: '/data'
    ```
 
@@ -55,7 +55,7 @@
 
 2. **Build Failures**
 
-   ```
+   ```text
    Error: Failed to compile
    ```
 
@@ -102,9 +102,8 @@
 
 3. **File Format Issues**
 
-         ```python
+   ```python
    Error: Invalid NIfTI header
-
    ```
 
    **Solutions:**
@@ -116,7 +115,7 @@
 
 1. **Connection Pool Exhaustion**
 
-   ```
+   ```text
    Error: Too many database connections
    ```
 
@@ -132,7 +131,7 @@
 
 2. **Slow Queries**
 
-   ```
+   ```text
    Warning: Query took longer than 5000ms
    ```
 
@@ -157,7 +156,7 @@
 
 1. **Rate Limiting**
 
-   ```
+   ```text
    Error: 429 Too Many Requests
    ```
 
@@ -176,7 +175,7 @@
 
 2. **Authentication Failures**
 
-   ```
+   ```text
    Error: Invalid token
    ```
 
@@ -189,7 +188,7 @@
 
 1. **Performance**
 
-   ```
+   ```text
    Warning: Component is re-rendering too often
    ```
 
@@ -208,7 +207,7 @@
 
 2. **WebGL Rendering**
 
-   ```
+   ```text
    Error: WebGL context lost
    ```
 
@@ -221,7 +220,7 @@
 
 1. **Container Startup**
 
-   ```
+   ```text
    Error: Container exited with code 1
    ```
 
@@ -232,7 +231,7 @@
 
 2. **Resource Constraints**
 
-   ```
+   ```text
    Error: No space left on device
    ```
 

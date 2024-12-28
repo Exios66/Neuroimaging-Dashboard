@@ -8,7 +8,7 @@ The Neuroimaging Dashboard API provides RESTful endpoints for managing neuroimag
 
 Authentication is handled via JWT tokens. Include the token in the Authorization header:
 
-```
+```http
 Authorization: Bearer <your_token>
 ```
 
@@ -335,6 +335,6 @@ ws://api.example.com/ws
 
 API endpoints can be tested using the provided Postman collection:
 
-```
+```plaintext
 docs/postman/neuroimaging-dashboard.postman_collection.json
 ```
