@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2196f3" />
+    <meta name="description" content="Neuroimaging Data Pipeline & Interactive Dashboard" />
+    
+    <title>Neuroimaging Dashboard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- Custom Styles -->
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f5f5f5;
+            color: rgba(0, 0, 0, 0.87);
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2196f3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error Messages */
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 16px;
+            border-radius: 4px;
+            margin: 16px;
+            display: none;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #323232;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .toast {
+                width: 90%;
+                margin: 0 auto;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Error Message Container -->
+    <div id="error-message" class="error-message"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Root Container -->
+    <div id="root"></div>
+
+    <!-- Error Boundary -->
+    <div id="error-boundary" style="display: none;">
+        <h1>Something went wrong</h1>
+        <button onclick="window.location.reload()">Reload Page</button>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Global error handling
+        window.onerror = function(message, source, lineno, colno, error) {
+            showError('An error occurred: ' + message);
+            return false;
+        };
+
+        // Show error message
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show toast notification
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        // Handle service worker registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(error => {
+                        console.error('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // Handle offline/online status
+        window.addEventListener('online', () => {
+            showToast('Back online');
+        });
+
+        window.addEventListener('offline', () => {
+            showToast('You are offline');
+        });
+
+        // Handle page visibility
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Pause any ongoing operations
+            } else {
+                // Resume operations and check for updates
+            }
+        });
+
+        // Handle beforeunload
+        window.addEventListener('beforeunload', (event) => {
+            // Check for unsaved changes
+            if (window.hasUnsavedChanges) {
+                event.preventDefault();
+                event.returnValue = '';
+            }
+        });
+
+        // Custom event handling
+        const eventBus = {
+            listeners: {},
+            subscribe(event, callback) {
+                if (!this.listeners[event]) {
+                    this.listeners[event] = [];
+                }
+                this.listeners[event].push(callback);
+            },
+            emit(event, data) {
+                if (this.listeners[event]) {
+                    this.listeners[event].forEach(callback => callback(data));
+                }
+            }
+        };
+
+        // Performance monitoring
+        const performance = {
+            marks: {},
+            mark(name) {
+                this.marks[name] = performance.now();
+            },
+            measure(name, startMark, endMark) {
+                const duration = this.marks[endMark] - this.marks[startMark];
+                console.log(`${name} took ${duration}ms`);
+                return duration;
+            }
+        };
+
+        // Initialize loading screen
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingScreen = document.getElementById('loading-screen');
+            
+            // Hide loading screen when app is ready
+            window.hideLoading = () => {
+                loadingScreen.style.display = 'none';
+            };
+
+            // Show loading screen
+            window.showLoading = () => {
+                loadingScreen.style.display = 'flex';
+            };
+        });
+
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            // Ctrl/Cmd + S for save
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                event.preventDefault();
+                eventBus.emit('save-requested');
+            }
+        });
+
+        // Initialize ResizeObserver for responsive components
+        const resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                eventBus.emit('element-resized', {
+                    element: entry.target,
+                    contentRect: entry.contentRect
+                });
+            }
+        });
+
+        // Handle WebSocket connections (if needed)
+        class WebSocketClient {
+            constructor(url) {
+                this.url = url;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+                this.connect();
+            }
+
+            connect() {
+                this.ws = new WebSocket(this.url);
+                this.ws.onopen = () => {
+                    console.log('WebSocket connected');
+                    this.reconnectAttempts = 0;
+                };
+                this.ws.onclose = () => {
+                    this.handleDisconnect();
+                };
+                this.ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+                this.ws.onmessage = (event) => {
+                    this.handleMessage(event.data);
+                };
+            }
+
+            handleDisconnect() {
+                if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                    setTimeout(() => {
+                        this.reconnectAttempts++;
+                        this.connect();
+                    }, 1000 * Math.pow(2, this.reconnectAttempts));
+                } else {
+                    showError('Unable to connect to server');
+                }
+            }
+
+            handleMessage(data) {
+                try {
+                    const message = JSON.parse(data);
+                    eventBus.emit('websocket-message', message);
+                } catch (error) {
+                    console.error('Error parsing WebSocket message:', error);
+                }
+            }
+
+            send(data) {
+                if (this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify(data));
+                } else {
+                    showError('WebSocket connection not open');
+                }
+            }
+        }
+
+        // Initialize application state management
+        const appState = {
+            state: {},
+            listeners: [],
+            
+            setState(newState) {
+                this.state = { ...this.state, ...newState };
+                this.notify();
+            },
+            
+            subscribe(listener) {
+                this.listeners.push(listener);
+                return () => {
+                    this.listeners = this.listeners.filter(l => l !== listener);
+                };
+            },
+            
+            notify() {
+                this.listeners.forEach(listener => listener(this.state));
+            }
+        };
+
+        // Initialize analytics tracking
+        const analytics = {
+            trackEvent(category, action, label) {
+                // Implement your analytics tracking here
+                console.log('Analytics:', { category, action, label });
+            },
+            
+            trackError(error) {
+                console.error('Error tracked:', error);
+                // Send error to analytics service
+            }
+        };
+
+        // Initialize feature detection
+        const features = {
+            webGL: (() => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    return !!(window.WebGLRenderingContext && 
+                        (canvas.getContext('webgl') || 
+                         canvas.getContext('experimental-webgl')));
+                } catch (e) {
+                    return false;
+                }
+            })(),
+            
+            webWorkers: !!window.Worker,
+            localStorage: !!window.localStorage,
+            indexedDB: !!window.indexedDB
+        };
+
+        // Check browser compatibility
+        if (!features.webGL) {
+            showError('WebGL is not supported in your browser. Some features may not work.');
+        }
+    </script>
+
+    <!-- Polyfills for older browsers -->
+    <script nomodule src="https://unpkg.com/core-js-bundle@3.6.5/minified.js"></script>
+</body>
+</html> 

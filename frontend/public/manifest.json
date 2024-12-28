@@ -1,0 +1,82 @@
+{
+  "short_name": "NeuroViz",
+  "name": "Neuroimaging Data Pipeline & Dashboard",
+  "description": "Advanced neuroimaging data analysis and visualization platform",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2196f3",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "categories": ["medical", "science", "productivity"],
+  "screenshots": [
+    {
+      "src": "screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Dashboard View"
+    },
+    {
+      "src": "screenshots/analysis.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Analysis View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/",
+      "icons": [{ "src": "icons/dashboard.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Analysis",
+      "url": "/analysis",
+      "icons": [{ "src": "icons/analysis.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Subjects",
+      "url": "/subjects",
+      "icons": [{ "src": "icons/subjects.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "permissions": [
+    "notifications",
+    "background-sync"
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "scans",
+          "accept": [".nii", ".nii.gz", ".dcm", "application/dicom"]
+        }
+      ]
+    }
+  }
+} 
